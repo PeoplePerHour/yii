@@ -18,6 +18,23 @@
 class CHttpCookie extends CComponent
 {
 	/**
+	 * SameSite policy Lax will prevent the cookie from being sent by the browser in all cross-site browsing context
+	 * during CSRF-prone request methods (e.g. POST, PUT, PATCH etc).
+	 * E.g. a POST request from https://otherdomain.com to https://yourdomain.com will not include the cookie, however a GET request will.
+	 * When a user follows a link from https://otherdomain.com to https://yourdomain.com it will include the cookie
+	 * @see $sameSite
+	 */
+	const SAME_SITE_LAX = 'Lax';
+	/**
+	 * SameSite policy Strict will prevent the cookie from being sent by the browser in all cross-site browsing context
+	 * regardless of the request method and even when following a regular link.
+	 * E.g. a GET request from https://otherdomain.com to https://yourdomain.com or a user following a link from
+	 * https://otherdomain.com to https://yourdomain.com will not include the cookie.
+	 * @see $sameSite
+	 */
+	const SAME_SITE_STRICT = 'Strict';
+
+	/**
 	 * @var string name of the cookie
 	 */
 	public $name;
@@ -48,6 +65,17 @@ class CHttpCookie extends CComponent
 	 * Note, this property is only effective for PHP 5.2.0 or above.
 	 */
 	public $httpOnly=false;
+	/**
+	 * @var string SameSite prevents the browser from sending this cookie along with cross-site requests. Defaults to Lax, meaning loads from a GET request or a POST request on same site, but not a POST request from another site.
+	 * Please note that this feature is only supported since PHP 7.3.0
+	 *
+	 * To use this feature across different PHP versions check the version first. E.g.
+	 * ```php
+	 * $cookie->sameSite = PHP_VERSION_ID >= 70300 ? yii\web\Cookie::SAME_SITE_LAX : null,
+	 * ```
+	 * See https://www.owasp.org/index.php/SameSite for more information about sameSite.
+	 */
+	public $sameSite=self::SAME_SITE_LAX;
 
 	/**
 	 * Constructor.
