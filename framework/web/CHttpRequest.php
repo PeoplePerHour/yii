@@ -1523,7 +1523,16 @@ class CCookieCollection extends CMap
 		$value=$cookie->value;
 		if($this->_request->enableCookieValidation)
 			$value=Yii::app()->getSecurityManager()->hashData(serialize($value));
-		if(version_compare(PHP_VERSION,'5.2.0','>='))
+		if (PHP_VERSION_ID >= 70300) { // PHP_VERSION >= '7.3.0'
+			setcookie($cookie->name, $value, [
+				'expires' => $cookie->expire,
+				'path' => $cookie->path,
+				'domain' => $cookie->domain,
+				'secure' => $cookie->secure,
+				'httpOnly' => $cookie->httpOnly,
+				'sameSite' => $cookie->sameSite,
+			]);
+		} else if(version_compare(PHP_VERSION,'5.2.0','>='))
 			setcookie($cookie->name,$value,$cookie->expire,$cookie->path,$cookie->domain,$cookie->secure,$cookie->httpOnly);
 		else
 			setcookie($cookie->name,$value,$cookie->expire,$cookie->path,$cookie->domain,$cookie->secure);
@@ -1535,7 +1544,9 @@ class CCookieCollection extends CMap
 	 */
 	protected function removeCookie($cookie)
 	{
-		if(version_compare(PHP_VERSION,'5.2.0','>='))
+		if (PHP_VERSION_ID >= 70300) // PHP_VERSION >= '7.3.0'
+			setcookie($cookie->name,'',0,$cookie->path,$cookie->domain,$cookie->secure,$cookie->httpOnly,$cookie->sameSite);
+		else if(version_compare(PHP_VERSION,'5.2.0','>='))
 			setcookie($cookie->name,'',0,$cookie->path,$cookie->domain,$cookie->secure,$cookie->httpOnly);
 		else
 			setcookie($cookie->name,'',0,$cookie->path,$cookie->domain,$cookie->secure);
