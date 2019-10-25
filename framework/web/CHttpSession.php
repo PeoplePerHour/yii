@@ -251,7 +251,7 @@ class CHttpSession extends CApplicationComponent implements IteratorAggregate,Ar
 		extract($value);
 		$this->freeze();
 		if(isset($httponly) && isset($sameSite))
-			session_set_cookie_params($lifetime,$path,$domain,$secure,$httponly,$sameSite);
+			session_set_cookie_params(['lifetime'=>$lifetime,'path'=>$path,'domain'=>$domain,'secure'=>$secure,'httponly'=>$httponly,'sameSite'=>$sameSite]);
 		else if(isset($httponly))
 			session_set_cookie_params($lifetime,$path,$domain,$secure,$httponly);
 		else

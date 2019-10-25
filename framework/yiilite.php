@@ -3090,14 +3090,32 @@ class CCookieCollection extends CMap
 		$value=$cookie->value;
 		if($this->_request->enableCookieValidation)
 			$value=Yii::app()->getSecurityManager()->hashData(serialize($value));
-		if(version_compare(PHP_VERSION,'5.2.0','>='))
+		if (PHP_VERSION_ID >= 70300) // PHP_VERSION >= '7.3.0'
+			setcookie($cookie->name, $value, [
+				'expires' => $cookie->expire,
+				'path' => $cookie->path,
+				'domain' => $cookie->domain,
+				'secure' => $cookie->secure,
+				'httpOnly' => $cookie->httpOnly,
+				'sameSite' => $cookie->sameSite,
+			]);
+		else if(version_compare(PHP_VERSION,'5.2.0','>='))
 			setcookie($cookie->name,$value,$cookie->expire,$cookie->path,$cookie->domain,$cookie->secure,$cookie->httpOnly);
 		else
 			setcookie($cookie->name,$value,$cookie->expire,$cookie->path,$cookie->domain,$cookie->secure);
 	}
 	protected function removeCookie($cookie)
 	{
-		if(version_compare(PHP_VERSION,'5.2.0','>='))
+		if (PHP_VERSION_ID >= 70300) // PHP_VERSION >= '7.3.0'
+			setcookie($cookie->name, '', [
+				'expires' => 0,
+				'path' => $cookie->path,
+				'domain' => $cookie->domain,
+				'secure' => $cookie->secure,
+				'httpOnly' => $cookie->httpOnly,
+				'sameSite' => $cookie->sameSite,
+			]);
+		else if(version_compare(PHP_VERSION,'5.2.0','>='))
 			setcookie($cookie->name,'',0,$cookie->path,$cookie->domain,$cookie->secure,$cookie->httpOnly);
 		else
 			setcookie($cookie->name,'',0,$cookie->path,$cookie->domain,$cookie->secure);
@@ -4688,7 +4706,9 @@ class CHttpSession extends CApplicationComponent implements IteratorAggregate,Ar
 		extract($data);
 		extract($value);
 		$this->freeze();
-		if(isset($httponly))
+		if(isset($httponly) && isset($sameSite))
+			session_set_cookie_params(['lifetime'=>$lifetime,'path'=>$path,'domain'=>$domain,'secure'=>$secure,'httponly'=>$httponly,'sameSite'=>$sameSite]);
+		else if(isset($httponly))
 			session_set_cookie_params($lifetime,$path,$domain,$secure,$httponly);
 		else
 			session_set_cookie_params($lifetime,$path,$domain,$secure);
