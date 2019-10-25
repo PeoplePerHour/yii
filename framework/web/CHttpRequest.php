@@ -1545,7 +1545,14 @@ class CCookieCollection extends CMap
 	protected function removeCookie($cookie)
 	{
 		if (PHP_VERSION_ID >= 70300) // PHP_VERSION >= '7.3.0'
-			setcookie($cookie->name,'',0,$cookie->path,$cookie->domain,$cookie->secure,$cookie->httpOnly,$cookie->sameSite);
+			setcookie($cookie->name, '', [
+				'expires' => 0,
+				'path' => $cookie->path,
+				'domain' => $cookie->domain,
+				'secure' => $cookie->secure,
+				'httpOnly' => $cookie->httpOnly,
+				'sameSite' => $cookie->sameSite,
+			]);
 		else if(version_compare(PHP_VERSION,'5.2.0','>='))
 			setcookie($cookie->name,'',0,$cookie->path,$cookie->domain,$cookie->secure,$cookie->httpOnly);
 		else
