@@ -499,19 +499,21 @@ class CWebUser extends CApplicationComponent implements IWebUser
 		}
 	}
 
-	/**
-	 * Saves necessary user data into a cookie.
-	 * This method is used when automatic login ({@link allowAutoLogin}) is enabled.
-	 * This method saves user ID, username, other identity states and a validation key to cookie.
-	 * These information are used to do authentication next time when user visits the application.
-	 * @param integer $duration number of seconds that the user can remain in logged-in status. Defaults to 0, meaning login till the user closes the browser.
-	 * @see restoreFromCookie
-	 */
-	protected function saveToCookie($duration)
+    /**
+     * Saves necessary user data into a cookie.
+     * This method is used when automatic login ({@link allowAutoLogin}) is enabled.
+     * This method saves user ID, username, other identity states and a validation key to cookie.
+     * These information are used to do authentication next time when user visits the application.
+     * @param integer $duration number of seconds that the user can remain in logged-in status. Defaults to 0, meaning login till the user closes the browser.
+     * @param string $sameSite
+     * @see restoreFromCookie
+     */
+	protected function saveToCookie($duration, $sameSite = CHttpCookie::SAME_SITE_NONE)
 	{
 		$app=Yii::app();
 		$cookie=$this->createIdentityCookie($this->getStateKeyPrefix());
 		$cookie->expire=time()+$duration;
+        $cookie->sameSite = $sameSite;
 		$data=array(
 			$this->getId(),
 			$this->getName(),

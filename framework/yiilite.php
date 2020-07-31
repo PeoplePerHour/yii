@@ -4442,7 +4442,7 @@ class CWebUser extends CApplicationComponent implements IWebUser
 			}
 		}
 	}
-	protected function saveToCookie($duration)
+	protected function saveToCookie($duration, $sameSite = CHttpCookie::SAME_SITE_NONE)
 	{
 		$app=Yii::app();
 		$cookie=$this->createIdentityCookie($this->getStateKeyPrefix());
