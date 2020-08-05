@@ -23,16 +23,19 @@ class CHttpCookie extends CComponent
 	 * E.g. a POST request from https://otherdomain.com to https://yourdomain.com will not include the cookie, however a GET request will.
 	 * When a user follows a link from https://otherdomain.com to https://yourdomain.com it will include the cookie
 	 * @see $sameSite
+
+	 * @since 1.1.22
 	 */
-	const SAME_SITE_LAX = 'Lax';
+	const SAME_SITE_LAX='Lax';
 	/**
 	 * SameSite policy Strict will prevent the cookie from being sent by the browser in all cross-site browsing context
 	 * regardless of the request method and even when following a regular link.
 	 * E.g. a GET request from https://otherdomain.com to https://yourdomain.com or a user following a link from
 	 * https://otherdomain.com to https://yourdomain.com will not include the cookie.
 	 * @see $sameSite
+	 * @since 1.1.22
 	 */
-	const SAME_SITE_STRICT = 'Strict';
+	const SAME_SITE_STRICT='Strict';
 
 	/**
 	 * @var string name of the cookie
@@ -74,6 +77,8 @@ class CHttpCookie extends CComponent
 	 * $cookie->sameSite = PHP_VERSION_ID >= 70300 ? yii\web\Cookie::SAME_SITE_LAX : null,
 	 * ```
 	 * See https://www.owasp.org/index.php/SameSite for more information about sameSite.
+	 * This property only works for PHP 7.3.0 or above.
+	 * @since 1.1.22
 	 */
 	public $sameSite=self::SAME_SITE_LAX;
 
