@@ -36,7 +36,7 @@ Yii::import('system.test.CTestCase');
  * @package system.test
  * @since 1.1
  */
-abstract class CDbTestCase extends CTestCase
+abstract class CDbTestCase extends \PHPUnit\Framework\TestCase
 {
 	/**
 	 * @var array a list of fixtures that should be loaded before each test method executes.
@@ -111,7 +111,7 @@ abstract class CDbTestCase extends CTestCase
 	 * If you override this method, make sure the parent implementation is invoked.
 	 * Otherwise, the database fixtures will not be managed properly.
 	 */
-	protected function setUp()
+	protected function setUp():  void
 	{
 		parent::setUp();
 		if(is_array($this->fixtures))

@@ -25,7 +25,7 @@ Yii::$enableIncludePath = false;
 Yii::setPathOfAlias('tests', dirname(__FILE__));
 Yii::import('tests.*');
 
-class CTestCase extends PHPUnit_Framework_TestCase
+class CTestCase extends \PHPUnit\Framework\TestCase
 {
 }
 
