@@ -178,7 +178,7 @@ class CHtmlTest extends CTestCase
 		);
 	}
 
-    /**
+	/**
 	 * @dataProvider providerCloseTag
 	 *
 	 * @param string $tag
@@ -267,6 +267,30 @@ class CHtmlTest extends CTestCase
 		$this->assertEquals($assertion, CHtml::linkTag($relation, $type, $href, $media, $options));
 	}
 
+	public static function providerCssWithoutCdata()
+	{
+		return array(
+			array('h1{font-size:20px;line-height:26px;}', '',
+				"<style type=\"text/css\">\nh1{font-size:20px;line-height:26px;}\n</style>"),
+			array('h2{font-size:16px;line-height:22px;}', 'screen',
+				"<style type=\"text/css\" media=\"screen\">\nh2{font-size:16px;line-height:22px;}\n</style>"),
+		);
+	}
+
+	/**
+	 * @dataProvider providerCssWithoutCdata
+	 * @backupStaticAttributes enabled
+	 *
+	 * @param string $text
+	 * @param string $media
+	 * @param string $assertion
+	 */
+	public function testCssWithoutCdata($text, $media, $assertion)
+	{
+		CHtml::$cdataScriptAndStyleContents=false;
+		$this->assertEquals($assertion, CHtml::css($text, $media));
+	}
+	
 	public static function providerCss()
 	{
 		return array(
@@ -328,6 +352,42 @@ class CHtmlTest extends CTestCase
 	{
 		$this->assertEquals($assertion, CHtml::script($text));
 	}
+	
+	public static function providerScriptWithoutCdata()
+	{
+		return array(
+			array('var a = 10;', "<script type=\"text/javascript\">\nvar a = 10;\n</script>"),
+			array("\t(function() { var x = 100; })();\n\tvar y = 200;",
+				"<script type=\"text/javascript\">\n\t(function() { var x = 100; })();\n\tvar y = 200;\n</script>"),
+		);
+	}
+
+	/**
+	 * @dataProvider providerScriptWithoutCdata
+	 * @backupStaticAttributes enabled
+	 *
+	 * @param string $text
+	 * @param string $assertion
+	 */
+	public function testScriptWithoutCdata($text, $assertion)
+	{
+		CHtml::$cdataScriptAndStyleContents=false;
+		$this->assertEquals($assertion, CHtml::script($text));
+	}
+	
+	/**
+	 * @dataProvider providerScript
+	 * @backupStaticAttributes enabled
+	 *
+	 * @param string $text
+	 * @param string $assertion
+	 */
+	public function testScriptHtml5($text, $assertion)
+	{
+		CHtml::$setScriptType=false;
+		$assertion=str_replace(' type="text/javascript"', '', $assertion);
+		$this->assertEquals($assertion, CHtml::script($text));
+	}
 
 	public static function providerScriptWithHtmlOptions()
 	{
@@ -342,11 +402,11 @@ class CHtmlTest extends CTestCase
 				array('async'=>true),
 				"<script type=\"text/javascript\" async=\"async\">\n/*<![CDATA[*/\nvar a = 10;\n/*]]>*/\n</script>"
 			),
-            array(
-                'var a = 10;',
-                array('async'=>false),
-                "<script type=\"text/javascript\" async=\"false\">\n/*<![CDATA[*/\nvar a = 10;\n/*]]>*/\n</script>"
-            ),
+			array(
+				'var a = 10;',
+				array('async'=>false),
+				"<script type=\"text/javascript\" async=\"false\">\n/*<![CDATA[*/\nvar a = 10;\n/*]]>*/\n</script>"
+			),
 		);
 	}
 
@@ -380,6 +440,20 @@ class CHtmlTest extends CTestCase
 	 */
 	public function testScriptFile($text, $assertion)
 	{
+		$this->assertEquals($assertion, CHtml::scriptFile($text));
+	}
+	
+	/**
+	 * @dataProvider providerScriptFile
+	 * @backupStaticAttributes enabled
+	 *
+	 * @param string $text
+	 * @param string $assertion
+	 */
+	public function testScriptFileHtml5($text, $assertion)
+	{
+		CHtml::$setScriptType=false;
+		$assertion=str_replace(' type="text/javascript"', '', $assertion);
 		$this->assertEquals($assertion, CHtml::scriptFile($text));
 	}
 
@@ -569,6 +643,13 @@ class CHtmlTest extends CTestCase
 			array(array('v1'),"0",'defaultValue','v1'),
 			array(array('v1'),0,'defaultValue','v1'),
 			array(array('v1'),0.0,'defaultValue','v1'),
+
+			// Test $model as an array, with null as a key, see: https://github.com/yiisoft/yii/pull/4503#discussion_r1054516859
+			array(array(null=>'v1','k2'=>'v2'),null,'defaultValue','v1'),
+			array(array(null=>'v1','k2'=>'v2'),'','defaultValue','v1'),
+			array(array(''=>'v1','k2'=>'v2'),null,'defaultValue','v1'),
+			array(array(''=>'v1','k2'=>'v2'),'','defaultValue','v1'),
+			array(array(null=>'v1','k2'=>'v2'),'k2','defaultValue','v2'),
 		);
 
 		// create_function is not supported by CHtml::value(), we're just testing this feature/property
@@ -597,7 +678,7 @@ class CHtmlTest extends CTestCase
 	 */
 	public function testValue($model, $attribute, $defaultValue, $assertion)
 	{
-		$this->assertEquals($assertion, CHtml::value($model, $attribute, $defaultValue));
+		$this->assertEquals($assertion, CHtml::value($model, $attribute, (string)$defaultValue));
 	}
 
 	/**
@@ -668,8 +749,8 @@ class CHtmlTest extends CTestCase
 		return array(
 			array(
 				10,
-				'http://yiiframework.com/',
-				'<meta http-equiv="refresh" content="10;url=http://yiiframework.com/" />'."\n",
+				'https://yiiframework.com/',
+				'<meta http-equiv="refresh" content="10;url=https://yiiframework.com/" />'."\n",
 			),
 			array(
 				15,
@@ -1027,8 +1108,8 @@ class CHtmlTest extends CTestCase
 				"jQuery('body').on('click','#yt0',function(){jQuery.yii.submitForm(this,'',{});return false;});"),
 			array('link-button', array(), '<a href="#" id="yt0">link-button</a>',
 				"jQuery('body').on('click','#yt0',function(){jQuery.yii.submitForm(this,'',{});return false;});"),
-			array('link-button', array('href'=>'http://yiiframework.com/'), '<a href="#" id="yt0">link-button</a>',
-				"jQuery('body').on('click','#yt0',function(){jQuery.yii.submitForm(this,'http\\x3A\\x2F\\x2Fyiiframework.com\\x2F',{});return false;});"),
+			array('link-button', array('href'=>'https://yiiframework.com/'), '<a href="#" id="yt0">link-button</a>',
+				"jQuery('body').on('click','#yt0',function(){jQuery.yii.submitForm(this,'https\\x3A\\x2F\\x2Fyiiframework.com\\x2F',{});return false;});"),
 		);
 	}
 
@@ -1054,17 +1135,17 @@ class CHtmlTest extends CTestCase
 		$out=CHtml::ajax(array(
 			'success'=>'js:function() { /* callback */ }',
 		));
-		$this->assertTrue(mb_strpos($out,"'success':function() { /* callback */ }", null, Yii::app()->charset)!==false, "Unexpected JavaScript: ".$out);
+		$this->assertTrue(mb_strpos($out,"'success':function() { /* callback */ }", 0, Yii::app()->charset)!==false, "Unexpected JavaScript: ".$out);
 
 		$out=CHtml::ajax(array(
 			'success'=>'function() { /* callback */ }',
 		));
-		$this->assertTrue(mb_strpos($out,"'success':function() { /* callback */ }", null, Yii::app()->charset)!==false, "Unexpected JavaScript: ".$out);
+		$this->assertTrue(mb_strpos($out,"'success':function() { /* callback */ }", 0, Yii::app()->charset)!==false, "Unexpected JavaScript: ".$out);
 
 		$out=CHtml::ajax(array(
 			'success'=>new CJavaScriptExpression('function() { /* callback */ }'),
 		));
-		$this->assertTrue(mb_strpos($out,"'success':function() { /* callback */ }", null, Yii::app()->charset)!==false, "Unexpected JavaScript: ".$out);
+		$this->assertTrue(mb_strpos($out,"'success':function() { /* callback */ }", 0, Yii::app()->charset)!==false, "Unexpected JavaScript: ".$out);
 	}
 }
 
@@ -1094,7 +1175,7 @@ class CHtmlTestModel extends CModel
 	 */
 	public $attr4;
 
-    /**
+	/**
 	 * Returns the list of attribute names.
 	 * @return array list of attribute names. Defaults to all public properties of the class.
 	 */
