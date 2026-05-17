@@ -490,7 +490,7 @@
         keys = key.split( '][' ),
         keys_last = keys.length - 1;
 
-      if ( prohibited_keys.includes( key ) ) {
+      if ( $.inArray( key, prohibited_keys ) !== -1 ) {
         return;
       }
       
@@ -535,7 +535,7 @@
           for ( ; i <= keys_last; i++ ) {
             key = keys[i] === '' ? cur.length : keys[i];
             
-            if ( prohibited_keys.includes( key ) ) {
+            if ( $.inArray( key, prohibited_keys ) !== -1 ) {
               return;
             }
 
