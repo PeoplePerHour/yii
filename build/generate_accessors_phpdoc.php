@@ -46,14 +46,14 @@ function getPhpDocForFile($fileName)
 
     $phpdoc = "";
     $file = str_replace("\r", "", str_replace("\t", "    ", file_get_contents($fileName, true)));
-    $classes = match('#\n(?:abstract )?class (?<name>\w+) extends .+\{(?<content>.+)\n\}(\n|$)#', $file);
+    $classes = matchPhpDoc('#\n(?:abstract )?class (?<name>\w+) extends .+\{(?<content>.+)\n\}(\n|$)#', $file);
 
     foreach ($classes as &$class) {
-        $gets = match(
+        $gets = matchPhpDoc(
             '#\* @return (?<type>\w+)(?: (?<comment>(?:(?!\*/|\* @).)+?)(?:(?!\*/).)+|[\s\n]*)\*/' .
             '[\s\n]{2,}public function (?<kind>get)(?<name>\w+)\((?:,? ?\$\w+ ?= ?[^,]+)*\)#',
             $class['content']);
-        $sets = match(
+        $sets = matchPhpDoc(
             '#\* @param (?<type>\w+) \$\w+(?: (?<comment>(?:(?!\*/|\* @).)+?)(?:(?!\*/).)+|[\s\n]*)\*/' .
             '[\s\n]{2,}public function (?<kind>set)(?<name>\w+)\(\$\w+(?:, ?\$\w+ ?= ?[^,]+)*\)#',
             $class['content']);
@@ -96,7 +96,7 @@ function getPhpDocForFile($fileName)
     return $phpdoc;
 }
 
-function match($pattern, $subject)
+function matchPhpDoc($pattern, $subject)
 {
     $sets = array();
     preg_match_all($pattern . 'suU', $subject, $sets, PREG_SET_ORDER);

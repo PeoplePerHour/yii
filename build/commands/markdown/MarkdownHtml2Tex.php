@@ -152,7 +152,7 @@ class MarkdownHtml2Tex
 			$filename = str_replace('.'.$fileinfo['extension'], '.png', $fileinfo['basename']);
 			$newfile = $this->img_dst_dir.'/'.$filename;
 			imagepng($im,$newfile);
-			imagedestroy($im);
+			unset($im);
 			return $this->include_figure($info, $filename, $matches);
 		}
 	}

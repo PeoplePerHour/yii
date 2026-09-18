@@ -286,7 +286,7 @@ class CCaptchaAction extends CAction
 		header('Content-Transfer-Encoding: binary');
 		header("Content-Type: image/png");
 		imagepng($image);
-		imagedestroy($image);
+		unset($image);
 	}
 
 	/**
