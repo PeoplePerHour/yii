@@ -44,6 +44,11 @@ class CFilterValidator extends CValidator
 	{
 		if($this->filter===null || !is_callable($this->filter))
 			throw new CException(Yii::t('yii','The "filter" property must be specified with a valid callback.'));
-		$object->$attribute=call_user_func_array($this->filter,array($object->$attribute));
+        $value = $object->$attribute;
+        // Preserve PHP 7's null-to-empty-string behavior for built-in text filters.
+        if ($value === null && is_string($this->filter) && in_array($this->filter, ['trim', 'ltrim', 'rtrim', 'strtolower', 'strtoupper', 'strip_tags'], true)) {
+            $value = '';
+        }
+        $object->$attribute = call_user_func($this->filter, $value);
 	}
 }

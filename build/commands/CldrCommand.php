@@ -93,7 +93,7 @@ EOD;
 				{
 					$this->usageError("Failed to download from '$latestUrl'.");
 				};
-				curl_close($ch);
+				unset($ch);
 				fclose($fp);
 			}
 			// unzip file
